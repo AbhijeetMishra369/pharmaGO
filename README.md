@@ -11,11 +11,11 @@ PharmaGo is a comprehensive online medicine delivery platform built with microse
 - **Architecture Pattern**: Microservices
 
 ## Microservices
-1. **User Service** - Handles user registration, authentication, and profile management
-2. **Medicine Service** - Manages medicine inventory and information
-3. **Order Service** - Handles order processing and management
-4. **Notification Service** - Manages email notifications and reminders
-5. **Gateway Service** - API Gateway for routing and load balancing
+1. **User Service** (Port 8081) - Handles user registration, authentication, and profile management
+2. **Medicine Service** (Port 8082) - Manages medicine inventory and information
+3. **Order Service** (Port 8083) - Handles order processing and management
+4. **Notification Service** (Port 8084) - Manages email notifications and reminders
+5. **Gateway Service** (Port 8080) - API Gateway for routing and load balancing
 
 ## Features
 
@@ -80,11 +80,11 @@ npm start
 - Run the provided SQL scripts
 
 ### API Documentation
-- Gateway Service: http://localhost:8080
-- User Service: http://localhost:8081
-- Medicine Service: http://localhost:8082
-- Order Service: http://localhost:8083
-- Notification Service: http://localhost:8084
+- **Gateway Service**: http://localhost:8080 (Main API endpoint)
+- **User Service**: http://localhost:8081
+- **Medicine Service**: http://localhost:8082
+- **Order Service**: http://localhost:8083
+- **Notification Service**: http://localhost:8084
 
 ### Testing
 ```bash

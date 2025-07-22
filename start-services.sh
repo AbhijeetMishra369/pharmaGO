@@ -96,10 +96,14 @@ sleep 5
 start_spring_service "medicine-service" 8082
 sleep 5
 
-# You can add more services here
-# start_spring_service "order-service" 8083
-# start_spring_service "notification-service" 8084
-# start_spring_service "gateway-service" 8080
+start_spring_service "order-service" 8083
+sleep 5
+
+start_spring_service "notification-service" 8084
+sleep 5
+
+start_spring_service "gateway-service" 8080
+sleep 5
 
 echo ""
 echo -e "${BLUE}Starting Frontend...${NC}"
@@ -125,8 +129,11 @@ echo -e "${GREEN}🎉 PharmaGo Application Started Successfully!${NC}"
 echo "============================================="
 echo ""
 echo -e "${BLUE}📱 Frontend:${NC} http://localhost:3000"
+echo -e "${BLUE}🌐 API Gateway:${NC} http://localhost:8080"
 echo -e "${BLUE}🔧 User Service:${NC} http://localhost:8081"
 echo -e "${BLUE}💊 Medicine Service:${NC} http://localhost:8082"
+echo -e "${BLUE}📦 Order Service:${NC} http://localhost:8083"
+echo -e "${BLUE}🔔 Notification Service:${NC} http://localhost:8084"
 echo ""
 echo -e "${YELLOW}📝 Logs are available in the 'logs' directory${NC}"
 echo -e "${YELLOW}🛑 To stop all services, run: ./stop-services.sh${NC}"
