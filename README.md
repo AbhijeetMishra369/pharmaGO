@@ -88,12 +88,30 @@ npm start
 
 ### Testing
 ```bash
+# Run comprehensive API tests for all services
+./test-all-services.sh
 # Backend tests
 mvn test
 
+# Individual service tests
+cd backend/user-service && mvn test
+cd backend/medicine-service && mvn test
+cd backend/order-service && mvn test
+cd backend/notification-service && mvn test
+
 # Frontend tests
-npm test
+cd frontend && npm test
 ```
+
+### Sample Data
+The database setup script includes sample data:
+- **3 Users**: 1 Admin, 2 Customers (password: "password" for all)
+- **6 Medicines**: Various categories with different prescription requirements
+- **3 Orders**: Sample orders with different statuses
+- **3 Reminders**: Active medicine reminders
+
+### Comprehensive API Documentation
+Complete API documentation with examples: [docs/API_DOCUMENTATION.md](docs/API_DOCUMENTATION.md)
 
 ## Project Structure
 ```
