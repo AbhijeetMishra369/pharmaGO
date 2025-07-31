@@ -60,11 +60,13 @@ export const authAPI = {
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   logout: async (): Promise<{ message: string }> => {
     const response = await api.post('/api/auth/signout');
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   refreshToken: async (): Promise<{ token: string; type: string }> => {
     const response = await api.post('/api/auth/refresh');
     return response.data;
@@ -78,6 +80,7 @@ export const userAPI = {
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   updateProfile: async (data: Partial<RegisterRequest>): Promise<User> => {
     const response = await api.put('/api/users/profile', data);
     return response.data;
@@ -112,41 +115,49 @@ export const userAPI = {
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   activateUser: async (id: number): Promise<{ message: string }> => {
     const response = await api.put(`/api/users/${id}/activate`);
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   deactivateUser: async (id: number): Promise<{ message: string }> => {
     const response = await api.put(`/api/users/${id}/deactivate`);
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   verifyEmail: async (token: string): Promise<{ message: string; success: boolean }> => {
     const response = await api.get(`/api/users/verify-email?token=${token}`);
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   forgotPassword: async (email: string): Promise<{ message: string }> => {
     const response = await api.post(`/api/users/forgot-password?email=${email}`);
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   resetPassword: async (token: string, newPassword: string): Promise<{ message: string; success: boolean }> => {
     const response = await api.post(`/api/users/reset-password?token=${token}&newPassword=${newPassword}`);
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   resendVerification: async (email: string): Promise<{ message: string }> => {
     const response = await api.post(`/api/users/resend-verification?email=${email}`);
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   checkEmail: async (email: string): Promise<{ exists: boolean }> => {
     const response = await api.get(`/api/users/check-email?email=${email}`);
     return response.data;
   },
 
+  // NOTE: Not in API_DOCUMENTATION.md
   checkContact: async (contactNumber: string): Promise<{ exists: boolean }> => {
     const response = await api.get(`/api/users/check-contact?contactNumber=${contactNumber}`);
     return response.data;
@@ -192,7 +203,7 @@ export const medicineAPI = {
   },
 
   searchMedicines: async (query: string): Promise<Medicine[]> => {
-    const response = await api.get(`/api/medicines/search?q=${query}`);
+    const response = await api.get(`/api/medicines/search?query=${query}`);
     return response.data;
   },
 
@@ -242,12 +253,12 @@ export const orderAPI = {
   },
 
   updateOrderStatus: async (id: number, status: string): Promise<Order> => {
-    const response = await api.put(`/api/orders/${id}/status`, { status });
+    const response = await api.put(`/api/orders/${id}/status?status=${status}`);
     return response.data;
   },
 
   cancelOrder: async (id: number): Promise<{ message: string }> => {
-    const response = await api.put(`/api/orders/${id}/cancel`);
+    const response = await api.delete(`/api/orders/${id}`);
     return response.data;
   },
 
@@ -257,7 +268,8 @@ export const orderAPI = {
     sortBy?: string;
     sortDir?: string;
   }): Promise<PaginatedResponse<Order>> => {
-    const response = await api.get('/api/orders/my-orders', { params });
+    const user = JSON.parse(localStorage.getItem('user') || '{}');
+    const response = await api.get(`/api/orders/user/${user.id}`, { params });
     return response.data;
   },
 };
