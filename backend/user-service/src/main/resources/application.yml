@@ -7,8 +7,8 @@ spring:
   
   datasource:
     url: jdbc:mysql://localhost:3306/pharmago_users?createDatabaseIfNotExist=true&useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC
-    username: root
-    password: password
+    username: pharmago
+    password: pharmago123
     driver-class-name: com.mysql.cj.jdbc.Driver
   
   jpa:
