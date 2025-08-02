@@ -24,6 +24,7 @@ const Login: React.FC = () => {
   });
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
+  const [success, setSuccess] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
   const { login, isAuthenticated } = useAuth();
@@ -31,6 +32,15 @@ const Login: React.FC = () => {
   const location = useLocation();
 
   const from = location.state?.from?.pathname || '/dashboard';
+
+  // Handle success message from registration
+  React.useEffect(() => {
+    if (location.state?.message) {
+      setSuccess(location.state.message);
+      // Clear the message from location state
+      navigate(location.pathname, { replace: true, state: {} });
+    }
+  }, [location.state, navigate, location.pathname]);
 
   // Redirect if already authenticated
   React.useEffect(() => {
@@ -46,6 +56,7 @@ const Login: React.FC = () => {
       [name]: value,
     }));
     if (error) setError(''); // Clear error when user starts typing
+    if (success) setSuccess(''); // Clear success when user starts typing
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -97,6 +108,13 @@ const Login: React.FC = () => {
               Sign in to your PharmaGo account
             </Typography>
           </Box>
+
+          {/* Success Alert */}
+          {success && (
+            <Alert severity="success" sx={{ mb: 2 }}>
+              {success}
+            </Alert>
+          )}
 
           {/* Error Alert */}
           {error && (
