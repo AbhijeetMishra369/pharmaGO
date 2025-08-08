@@ -1,0 +1,245 @@
+version: '3.8'
+
+services:
+  # MySQL Database
+  mysql:
+    image: mysql:8.0
+    container_name: pharmago-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: root_password
+      MYSQL_DATABASE: pharmago_users
+      MYSQL_USER: pharmago_user
+      MYSQL_PASSWORD: pharmago_password
+    ports:
+      - "3306:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ../pharmago-database/init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - pharmago-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      timeout: 10s
+      retries: 10
+
+  # Eureka Service Discovery
+  eureka-server:
+    image: openjdk:17-jre-slim
+    container_name: pharmago-eureka
+    ports:
+      - "8761:8761"
+    environment:
+      - JAVA_OPTS=-Xmx512m
+    volumes:
+      - ../scripts/eureka-server.jar:/app/eureka-server.jar
+    networks:
+      - pharmago-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8761/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+    command: ["java", "-jar", "/app/eureka-server.jar"]
+
+  # API Gateway
+  api-gateway:
+    build:
+      context: ../pharmago-backend/api-gateway
+      dockerfile: Dockerfile
+    container_name: pharmago-api-gateway
+    ports:
+      - "8080:8080"
+    environment:
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - SPRING_PROFILES_ACTIVE=docker
+    depends_on:
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - pharmago-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8080/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # User Service
+  user-service:
+    build:
+      context: ../pharmago-backend/user-service
+      dockerfile: Dockerfile
+    container_name: pharmago-user-service
+    ports:
+      - "8081:8081"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=pharmago_users
+      - DB_USERNAME=pharmago_user
+      - DB_PASSWORD=pharmago_password
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - JWT_SECRET=pharmaGoSecretKeyForJWTTokenGenerationAndValidation2024
+      - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - pharmago-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8081/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Medicine Service
+  medicine-service:
+    build:
+      context: ../pharmago-backend/medicine-service
+      dockerfile: Dockerfile
+    container_name: pharmago-medicine-service
+    ports:
+      - "8082:8082"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=pharmago_medicines
+      - DB_USERNAME=pharmago_user
+      - DB_PASSWORD=pharmago_password
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - pharmago-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8082/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Order Service
+  order-service:
+    build:
+      context: ../pharmago-backend/order-service
+      dockerfile: Dockerfile
+    container_name: pharmago-order-service
+    ports:
+      - "8083:8083"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=pharmago_orders
+      - DB_USERNAME=pharmago_user
+      - DB_PASSWORD=pharmago_password
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - USER_SERVICE_URL=http://user-service:8081
+      - MEDICINE_SERVICE_URL=http://medicine-service:8082
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+      user-service:
+        condition: service_healthy
+      medicine-service:
+        condition: service_healthy
+    networks:
+      - pharmago-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8083/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Notification Service
+  notification-service:
+    build:
+      context: ../pharmago-backend/notification-service
+      dockerfile: Dockerfile
+    container_name: pharmago-notification-service
+    ports:
+      - "8084:8084"
+    environment:
+      - SPRING_PROFILES_ACTIVE=docker
+      - DB_HOST=mysql
+      - DB_PORT=3306
+      - DB_NAME=pharmago_notifications
+      - DB_USERNAME=pharmago_user
+      - DB_PASSWORD=pharmago_password
+      - EUREKA_SERVER_URL=http://eureka-server:8761/eureka/
+      - MAIL_HOST=${MAIL_HOST:-smtp.gmail.com}
+      - MAIL_USERNAME=${MAIL_USERNAME:-}
+      - MAIL_PASSWORD=${MAIL_PASSWORD:-}
+    depends_on:
+      mysql:
+        condition: service_healthy
+      eureka-server:
+        condition: service_healthy
+    networks:
+      - pharmago-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8084/actuator/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # React Frontend
+  frontend:
+    build:
+      context: ../pharmago-frontend
+      dockerfile: Dockerfile
+    container_name: pharmago-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      - REACT_APP_API_BASE_URL=http://localhost:8080
+      - REACT_APP_ENVIRONMENT=docker
+    depends_on:
+      - api-gateway
+    networks:
+      - pharmago-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:3000"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Redis for caching (optional)
+  redis:
+    image: redis:7-alpine
+    container_name: pharmago-redis
+    ports:
+      - "6379:6379"
+    networks:
+      - pharmago-network
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+volumes:
+  mysql_data:
+    driver: local
+
+networks:
+  pharmago-network:
+    driver: bridge
