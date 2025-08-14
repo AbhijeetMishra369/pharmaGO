@@ -25,14 +25,14 @@ services:
 
   # Eureka Service Discovery
   eureka-server:
-    image: openjdk:17-jre-slim
+    build:
+      context: ../pharmago-backend/eureka-server
+      dockerfile: Dockerfile
     container_name: pharmago-eureka
     ports:
       - "8761:8761"
     environment:
-      - JAVA_OPTS=-Xmx512m
-    volumes:
-      - ../scripts/eureka-server.jar:/app/eureka-server.jar
+      - SPRING_PROFILES_ACTIVE=docker
     networks:
       - pharmago-network
     restart: unless-stopped
@@ -41,7 +41,6 @@ services:
       interval: 30s
       timeout: 10s
       retries: 3
-    command: ["java", "-jar", "/app/eureka-server.jar"]
 
   # API Gateway
   api-gateway:
